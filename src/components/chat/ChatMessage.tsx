@@ -12,7 +12,7 @@ interface ChatMessageProps {
 }
 
 // Expresiones regulares para detectar LaTeX
-const dollarRegex = /\$\$(.*?)\$\$/g;
+const dollarRegex = /\$\$(.*?)\$\$/gs;
 const inlineLatexRegex = /\$(.*?)\$/g;
 
 export default function ChatMessage({ message }: ChatMessageProps) {
@@ -20,70 +20,89 @@ export default function ChatMessage({ message }: ChatMessageProps) {
   
   // Procesa el contenido para renderizar LaTeX y Markdown
   const processContent = () => {
-    let processedContent = content;
+    // Preparamos un array para construir el resultado
+    const parts: JSX.Element[] = [];
+    let lastIndex = 0;
+    let key = 0;
     
-    // Primero extraemos los bloques de LaTeX y los reemplazamos con placeholders
-    const latexBlocks: string[] = [];
-    processedContent = processedContent.replace(dollarRegex, (match, latex) => {
-      latexBlocks.push(latex);
-      return `$$LATEX_BLOCK_${latexBlocks.length - 1}$$`;
-    });
+    // Primero extraemos los bloques de LaTeX
+    let contentCopy = content;
+    let match;
     
-    // Luego extraemos LaTeX inline
-    const inlineLatex: string[] = [];
-    processedContent = processedContent.replace(inlineLatexRegex, (match, latex) => {
-      inlineLatex.push(latex);
-      return `$INLINE_LATEX_${inlineLatex.length - 1}$`;
-    });
+    // Procesar bloques de LaTeX ($$...$$)
+    while ((match = dollarRegex.exec(contentCopy)) !== null) {
+      // Añadir texto antes del bloque LaTeX
+      if (match.index > lastIndex) {
+        const textBefore = contentCopy.slice(lastIndex, match.index);
+        parts.push(
+          <ReactMarkdown key={key++} className="inline">
+            {textBefore}
+          </ReactMarkdown>
+        );
+      }
+      
+      // Añadir el bloque LaTeX
+      try {
+        const latexContent = match[1].trim();
+        parts.push(
+          <div key={key++} className="py-2 overflow-x-auto">
+            <BlockMath math={latexContent} />
+          </div>
+        );
+      } catch (error) {
+        parts.push(<span key={key++} className="text-red-500">Error al renderizar LaTeX</span>);
+      }
+      
+      lastIndex = match.index + match[0].length;
+    }
     
-    // Renderizamos el markdown con componentes personalizados para manejar nuestros placeholders
-    return (
-      <ReactMarkdown
-        components={{
-          p: ({ node, children, ...props }) => {
-            const content = children?.toString() || "";
-            
-            // Si contiene un placeholder de LaTeX block
-            if (typeof content === 'string' && content.includes('$$LATEX_BLOCK_')) {
-              const blockIndex = parseInt(content.match(/LATEX_BLOCK_(\d+)/)?.[1] || "0");
-              return <div className="katex-container overflow-x-auto py-2"><BlockMath math={latexBlocks[blockIndex]} /></div>;
-            }
-            
-            // Si contiene placeholders de LaTeX inline
-            if (typeof content === 'string' && content.includes('$INLINE_LATEX_')) {
-              // Dividimos el texto en partes, alternando entre texto plano y LaTeX inline
-              const parts = content.split(/(\$INLINE_LATEX_\d+\$)/g);
-              return (
-                <p {...props}>
-                  {parts.map((part, index) => {
-                    if (part.startsWith('$INLINE_LATEX_')) {
-                      const inlineIndex = parseInt(part.match(/INLINE_LATEX_(\d+)/)?.[1] || "0");
-                      return <InlineMath key={index} math={inlineLatex[inlineIndex]} />;
-                    }
-                    return <span key={index}>{part}</span>;
-                  })}
-                </p>
-              );
-            }
-            
-            // Para párrafos normales
-            return <p {...props}>{children}</p>;
-          },
-          // Configuración para otros elementos markdown
-          code: ({ node, children, ...props }) => {
-            return <code className="bg-muted px-1 py-0.5 rounded text-sm" {...props}>{children}</code>;
-          },
-          h1: ({ children }) => <h1 className="text-2xl font-bold mt-6 mb-4">{children}</h1>,
-          h2: ({ children }) => <h2 className="text-xl font-bold mt-5 mb-3">{children}</h2>,
-          h3: ({ children }) => <h3 className="text-lg font-bold mt-4 mb-2">{children}</h3>,
-          ul: ({ children }) => <ul className="list-disc pl-6 my-2">{children}</ul>,
-          ol: ({ children }) => <ol className="list-decimal pl-6 my-2">{children}</ol>,
-          li: ({ children }) => <li className="my-1">{children}</li>,
-        }}
-      >
-        {processedContent}
-      </ReactMarkdown>
-    );
+    // Añadir el texto restante después del último bloque
+    if (lastIndex < contentCopy.length) {
+      const remainingContent = contentCopy.slice(lastIndex);
+      
+      // Procesar inline LaTeX ($...$) en el texto restante
+      let inlineLastIndex = 0;
+      let inlineParts: (string | JSX.Element)[] = [];
+      let inlineMatch;
+      
+      while ((inlineMatch = inlineLatexRegex.exec(remainingContent)) !== null) {
+        // Añadir texto antes del inline LaTeX
+        if (inlineMatch.index > inlineLastIndex) {
+          inlineParts.push(remainingContent.slice(inlineLastIndex, inlineMatch.index));
+        }
+        
+        // Añadir el inline LaTeX
+        try {
+          const inlineLatexContent = inlineMatch[1].trim();
+          inlineParts.push(<InlineMath key={`inline-${key++}`} math={inlineLatexContent} />);
+        } catch (error) {
+          inlineParts.push(<span key={`inline-${key++}`} className="text-red-500">Error LaTeX</span>);
+        }
+        
+        inlineLastIndex = inlineMatch.index + inlineMatch[0].length;
+      }
+      
+      // Añadir el texto restante después del último inline LaTeX
+      if (inlineLastIndex < remainingContent.length) {
+        inlineParts.push(remainingContent.slice(inlineLastIndex));
+      }
+      
+      // Convertir las partes inline a JSX
+      if (inlineParts.length > 0) {
+        const combinedInlineContent = inlineParts.map((part, idx) => {
+          if (typeof part === 'string') {
+            return <ReactMarkdown key={`md-${idx}`}>{part}</ReactMarkdown>;
+          }
+          return part;
+        });
+        
+        parts.push(<>{combinedInlineContent}</>);
+      } else {
+        parts.push(<ReactMarkdown key={key++}>{remainingContent}</ReactMarkdown>);
+      }
+    }
+    
+    return <>{parts}</>;
   };
 
   return (

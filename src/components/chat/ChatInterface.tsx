@@ -1,13 +1,14 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { SendIcon, BookOpenIcon, RotateCcwIcon } from 'lucide-react';
+import { SendIcon, BookOpenIcon, RotateCcwIcon, Settings2Icon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import ChatMessage from './ChatMessage';
+import ChatSettings from './ChatSettings';
 import { useAuth } from '@/context/AuthContext';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 // Tipo para los mensajes
 export interface Message {
@@ -31,6 +32,7 @@ export default function ChatInterface() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [apiKey, setApiKey] = useState('');
+  const [showSettings, setShowSettings] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast: toastHook } = useToast();
@@ -87,8 +89,8 @@ export default function ChatInterface() {
     setInput(e.target.value);
   };
 
-  const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setApiKey(e.target.value);
+  const handleApiKeyChange = (newApiKey: string) => {
+    setApiKey(newApiKey);
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -261,6 +263,19 @@ export default function ChatInterface() {
     }
   };
 
+  // Si se muestra la vista de configuración
+  if (showSettings) {
+    return (
+      <div className="flex flex-col h-[calc(100vh-5rem)] max-w-4xl w-full mx-auto">
+        <ChatSettings 
+          onBack={() => setShowSettings(false)}
+          apiKey={apiKey}
+          onApiKeyChange={handleApiKeyChange}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-[calc(100vh-5rem)] max-w-4xl w-full mx-auto">
       <div className="flex justify-between mb-4 items-center">
@@ -278,6 +293,16 @@ export default function ChatInterface() {
             <span className="inline sm:hidden">Ejercicio</span>
           </Button>
           <Button 
+            onClick={() => setShowSettings(true)}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-1"
+          >
+            <Settings2Icon className="w-4 h-4" />
+            <span className="hidden sm:inline">Configuración</span>
+            <span className="inline sm:hidden">Ajustes</span>
+          </Button>
+          <Button 
             onClick={handleClearChat}
             variant="ghost"
             size="sm"
@@ -288,26 +313,6 @@ export default function ChatInterface() {
             <span className="inline sm:hidden">Reiniciar</span>
           </Button>
         </div>
-      </div>
-      
-      {/* Configuración de API */}
-      <div className="mb-4 p-3 border rounded-md bg-muted/20">
-        <label htmlFor="apiKey" className="block text-sm font-medium mb-1">
-          API Key de DeepSeek (opcional)
-        </label>
-        <div className="flex gap-2">
-          <input
-            id="apiKey"
-            type="password"
-            value={apiKey}
-            onChange={handleApiKeyChange}
-            className="flex-1 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            placeholder="Ingresa tu API key para usar DeepSeek"
-          />
-        </div>
-        <p className="text-xs text-muted-foreground mt-1">
-          Si no proporcionas una API key, se usarán respuestas simuladas.
-        </p>
       </div>
       
       <ScrollArea className="flex-grow mb-4 border rounded-lg bg-background">
