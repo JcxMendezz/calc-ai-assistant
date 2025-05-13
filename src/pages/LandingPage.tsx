@@ -2,6 +2,8 @@
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import 'katex/dist/katex.min.css';
+import { BlockMath } from 'react-katex';
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -41,7 +43,7 @@ export default function LandingPage() {
 
         <div className="math-display mx-auto my-8 p-6 border rounded-lg bg-card max-w-xl overflow-x-auto">
           <div className="katex-display">
-            $$\int x^n dx = \frac{x^{n+1}}{n+1} + C \quad \text{para} \quad n \neq -1$$
+            <BlockMath math={String.raw`\int x^n dx = \frac{x^{n+1}}{n+1} + C \quad \text{para} \quad n \neq -1`} />
           </div>
         </div>
 
