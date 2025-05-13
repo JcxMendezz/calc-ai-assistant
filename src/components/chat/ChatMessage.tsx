@@ -70,8 +70,8 @@ export default function ChatMessage({ message }: ChatMessageProps) {
             return <p {...props}>{children}</p>;
           },
           // Configuración para otros elementos markdown
-          code: ({ node, children, ...props }) => {
-            if (props.inline) {
+          code: ({ node, inline, className, children, ...props }) => {
+            if (inline) {
               return <code className="bg-muted px-1 py-0.5 rounded text-sm" {...props}>{children}</code>;
             }
             return <pre className="p-3 rounded-md bg-muted overflow-x-auto"><code {...props}>{children}</code></pre>;
