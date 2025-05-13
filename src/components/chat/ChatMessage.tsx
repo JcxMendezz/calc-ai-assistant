@@ -35,9 +35,9 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       if (match.index > lastIndex) {
         const textBefore = contentCopy.slice(lastIndex, match.index);
         parts.push(
-          <ReactMarkdown key={key++} className="inline">
-            {textBefore}
-          </ReactMarkdown>
+          <div key={key++} className="inline">
+            <ReactMarkdown>{textBefore}</ReactMarkdown>
+          </div>
         );
       }
       
@@ -91,14 +91,22 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       if (inlineParts.length > 0) {
         const combinedInlineContent = inlineParts.map((part, idx) => {
           if (typeof part === 'string') {
-            return <ReactMarkdown key={`md-${idx}`}>{part}</ReactMarkdown>;
+            return (
+              <div key={`md-${idx}`}>
+                <ReactMarkdown>{part}</ReactMarkdown>
+              </div>
+            );
           }
           return part;
         });
         
         parts.push(<>{combinedInlineContent}</>);
       } else {
-        parts.push(<ReactMarkdown key={key++}>{remainingContent}</ReactMarkdown>);
+        parts.push(
+          <div key={key++}>
+            <ReactMarkdown>{remainingContent}</ReactMarkdown>
+          </div>
+        );
       }
     }
     
