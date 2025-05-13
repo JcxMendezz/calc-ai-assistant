@@ -70,11 +70,8 @@ export default function ChatMessage({ message }: ChatMessageProps) {
             return <p {...props}>{children}</p>;
           },
           // Configuración para otros elementos markdown
-          code: ({ node, inline, className, children, ...props }) => {
-            if (inline) {
-              return <code className="bg-muted px-1 py-0.5 rounded text-sm" {...props}>{children}</code>;
-            }
-            return <pre className="p-3 rounded-md bg-muted overflow-x-auto"><code {...props}>{children}</code></pre>;
+          code: ({ node, children, ...props }) => {
+            return <code className="bg-muted px-1 py-0.5 rounded text-sm" {...props}>{children}</code>;
           },
           h1: ({ children }) => <h1 className="text-2xl font-bold mt-6 mb-4">{children}</h1>,
           h2: ({ children }) => <h2 className="text-xl font-bold mt-5 mb-3">{children}</h2>,
@@ -83,12 +80,6 @@ export default function ChatMessage({ message }: ChatMessageProps) {
           ol: ({ children }) => <ol className="list-decimal pl-6 my-2">{children}</ol>,
           li: ({ children }) => <li className="my-1">{children}</li>,
         }}
-        className={cn(
-          "prose prose-sm max-w-none",
-          "prose-pre:bg-muted prose-pre:rounded-md",
-          "prose-headings:font-semibold prose-headings:mb-2 prose-headings:mt-4",
-          "prose-p:my-2 prose-li:my-0"
-        )}
       >
         {processedContent}
       </ReactMarkdown>

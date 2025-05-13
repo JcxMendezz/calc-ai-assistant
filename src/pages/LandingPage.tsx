@@ -38,6 +38,10 @@ export default function LandingPage() {
               <span className="bg-primary/20 text-primary p-1 rounded mr-3">✓</span>
               <span>Generación de ejercicios para practicar</span>
             </li>
+            <li className="flex items-start">
+              <span className="bg-primary/20 text-primary p-1 rounded mr-3">✓</span>
+              <span>Integración con DeepSeek AI para respuestas avanzadas</span>
+            </li>
           </ul>
         </div>
 

@@ -7,7 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import ChatMessage from './ChatMessage';
 import { useAuth } from '@/context/AuthContext';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/sonner';
 
 // Tipo para los mensajes
 export interface Message {
@@ -30,14 +30,21 @@ export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [apiKey, setApiKey] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { toast } = useToast();
+  const { toast: toastHook } = useToast();
   const { user } = useAuth();
 
-  // Cargar mensajes del localStorage al iniciar
+  // Cargar mensajes y API key del localStorage al iniciar
   useEffect(() => {
     const savedMessages = localStorage.getItem('chatHistory');
+    const savedApiKey = localStorage.getItem('deepseekApiKey');
+    
+    if (savedApiKey) {
+      setApiKey(savedApiKey);
+    }
+    
     if (savedMessages) {
       try {
         setMessages(JSON.parse(savedMessages));
@@ -64,6 +71,13 @@ export default function ChatInterface() {
     }
   }, [messages]);
 
+  // Guardar API key en localStorage cuando cambie
+  useEffect(() => {
+    if (apiKey) {
+      localStorage.setItem('deepseekApiKey', apiKey);
+    }
+  }, [apiKey]);
+
   // Scroll al fondo cuando se añaden mensajes
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -71,6 +85,10 @@ export default function ChatInterface() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
+  };
+
+  const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setApiKey(e.target.value);
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -91,19 +109,73 @@ export default function ChatInterface() {
     setIsLoading(true);
     
     try {
-      // En una implementación real, aquí se haría la llamada a la API de OpenAI
-      // Por ahora simulamos una respuesta del asistente
-      setTimeout(() => {
-        generateAIResponse(userMessage.content);
-      }, 1000);
+      if (apiKey) {
+        // Llamada a la API de DeepSeek
+        await sendToDeepSeek(userMessage.content);
+      } else {
+        // Simulación de respuesta si no hay API key
+        setTimeout(() => {
+          generateAIResponse(userMessage.content);
+        }, 1000);
+      }
     } catch (error) {
       console.error('Error sending message:', error);
-      toast({
+      toastHook({
         title: "Error",
         description: "No se pudo enviar el mensaje. Inténtalo de nuevo.",
         variant: "destructive"
       });
       setIsLoading(false);
+    }
+  };
+
+  const sendToDeepSeek = async (message: string) => {
+    try {
+      const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'deepseek-chat',
+          messages: [
+            {
+              role: 'system',
+              content: 'Eres un asistente especializado en cálculo integral. Responde en español y utiliza LaTeX para las fórmulas matemáticas. Utiliza $$ para fórmulas en bloque y $ para fórmulas inline.'
+            },
+            {
+              role: 'user',
+              content: message
+            }
+          ]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error en la API: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // Añadir la respuesta de DeepSeek
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: data.choices[0].message.content,
+        role: 'assistant',
+        timestamp: Date.now()
+      };
+      
+      setMessages(prev => [...prev, assistantMessage]);
+      setIsLoading(false);
+      
+    } catch (error) {
+      console.error('Error con la API de DeepSeek:', error);
+      toast.error('Error al conectar con DeepSeek. Verifica tu API key.');
+      setIsLoading(false);
+      
+      // Respuesta de respaldo
+      generateAIResponse(message);
     }
   };
 
@@ -216,6 +288,26 @@ export default function ChatInterface() {
             <span className="inline sm:hidden">Reiniciar</span>
           </Button>
         </div>
+      </div>
+      
+      {/* Configuración de API */}
+      <div className="mb-4 p-3 border rounded-md bg-muted/20">
+        <label htmlFor="apiKey" className="block text-sm font-medium mb-1">
+          API Key de DeepSeek (opcional)
+        </label>
+        <div className="flex gap-2">
+          <input
+            id="apiKey"
+            type="password"
+            value={apiKey}
+            onChange={handleApiKeyChange}
+            className="flex-1 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            placeholder="Ingresa tu API key para usar DeepSeek"
+          />
+        </div>
+        <p className="text-xs text-muted-foreground mt-1">
+          Si no proporcionas una API key, se usarán respuestas simuladas.
+        </p>
       </div>
       
       <ScrollArea className="flex-grow mb-4 border rounded-lg bg-background">
