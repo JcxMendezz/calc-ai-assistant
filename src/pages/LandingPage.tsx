@@ -1,16 +1,14 @@
-
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import 'katex/dist/katex.min.css';
 import { BlockMath } from 'react-katex';
-
 export default function LandingPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
-
-  return (
-    <div className="w-full max-w-4xl mx-auto px-4 py-12 text-center">
+  const {
+    user
+  } = useAuth();
+  return <div className="w-full max-w-4xl mx-auto px-4 py-12 text-center">
       <div className="animate-fade-in space-y-6">
         <h1 className="text-4xl md:text-5xl font-bold mb-6">
           Calculus <span className="text-primary">AI</span>
@@ -60,6 +58,5 @@ export default function LandingPage() {
           </Button>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 }
