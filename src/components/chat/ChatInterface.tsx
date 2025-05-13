@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { SendIcon, BookOpenIcon, RotateCcwIcon, Settings2Icon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -266,7 +265,7 @@ export default function ChatInterface() {
   // Si se muestra la vista de configuración
   if (showSettings) {
     return (
-      <div className="flex flex-col h-[calc(100vh-5rem)] max-w-4xl w-full mx-auto">
+      <div className="flex flex-col h-full max-w-4xl w-full mx-auto">
         <ChatSettings 
           onBack={() => setShowSettings(false)}
           apiKey={apiKey}
@@ -277,7 +276,7 @@ export default function ChatInterface() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-5rem)] max-w-4xl w-full mx-auto">
+    <div className="flex flex-col h-[calc(100vh-6rem)] max-w-4xl w-full mx-auto">
       <div className="flex justify-between mb-4 items-center">
         <h2 className="text-xl font-bold">Asistente de Cálculo Integral</h2>
         <div className="flex gap-2">
@@ -315,8 +314,8 @@ export default function ChatInterface() {
         </div>
       </div>
       
-      <ScrollArea className="flex-grow mb-4 border rounded-lg bg-background">
-        <div className="p-4 space-y-4">
+      <ScrollArea className="flex-grow mb-4 border rounded-lg bg-background overflow-hidden">
+        <div className="p-4 space-y-4 min-h-full">
           {messages.map((message) => (
             <ChatMessage key={message.id} message={message} />
           ))}

@@ -118,17 +118,19 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       "flex gap-3 py-4 -mx-2 px-2 rounded-lg animate-fade-in",
       role === "assistant" ? "bg-muted/30" : ""
     )}>
-      <Avatar className={cn(
-        "h-8 w-8 rounded-md",
-        role === "assistant" ? "bg-primary/20" : "bg-secondary"
-      )}>
-        {role === "assistant" ? (
-          <BrainIcon className="h-4 w-4 text-primary" />
-        ) : (
-          <UserIcon className="h-4 w-4" />
-        )}
-      </Avatar>
-      <div className="chat-message flex-1 overflow-hidden">
+      <div className="flex-shrink-0 mt-1">
+        <Avatar className={cn(
+          "h-8 w-8 rounded-md flex items-center justify-center",
+          role === "assistant" ? "bg-primary/20" : "bg-secondary"
+        )}>
+          {role === "assistant" ? (
+            <BrainIcon className="h-4 w-4 text-primary" />
+          ) : (
+            <UserIcon className="h-4 w-4" />
+          )}
+        </Avatar>
+      </div>
+      <div className="chat-message flex-1 break-words overflow-x-auto">
         {processContent()}
       </div>
     </div>
