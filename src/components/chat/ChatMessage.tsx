@@ -39,12 +39,6 @@ export default function ChatMessage({ message }: ChatMessageProps) {
     // Renderizamos el markdown con componentes personalizados para manejar nuestros placeholders
     return (
       <ReactMarkdown
-        className={cn(
-          "prose prose-sm max-w-none",
-          "prose-pre:bg-muted prose-pre:rounded-md",
-          "prose-headings:font-semibold prose-headings:mb-2 prose-headings:mt-4",
-          "prose-p:my-2 prose-li:my-0"
-        )}
         components={{
           p: ({ node, children, ...props }) => {
             const content = children?.toString() || "";
@@ -76,8 +70,8 @@ export default function ChatMessage({ message }: ChatMessageProps) {
             return <p {...props}>{children}</p>;
           },
           // Configuración para otros elementos markdown
-          code: ({ node, inline, children, ...props }) => {
-            if (inline) {
+          code: ({ node, children, ...props }) => {
+            if (props.inline) {
               return <code className="bg-muted px-1 py-0.5 rounded text-sm" {...props}>{children}</code>;
             }
             return <pre className="p-3 rounded-md bg-muted overflow-x-auto"><code {...props}>{children}</code></pre>;
@@ -89,6 +83,12 @@ export default function ChatMessage({ message }: ChatMessageProps) {
           ol: ({ children }) => <ol className="list-decimal pl-6 my-2">{children}</ol>,
           li: ({ children }) => <li className="my-1">{children}</li>,
         }}
+        className={cn(
+          "prose prose-sm max-w-none",
+          "prose-pre:bg-muted prose-pre:rounded-md",
+          "prose-headings:font-semibold prose-headings:mb-2 prose-headings:mt-4",
+          "prose-p:my-2 prose-li:my-0"
+        )}
       >
         {processedContent}
       </ReactMarkdown>
