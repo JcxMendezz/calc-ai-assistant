@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { SendIcon, BookOpenIcon, RotateCcwIcon, Settings2Icon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -132,6 +133,28 @@ export default function ChatInterface() {
 
   const sendToDeepSeek = async (message: string) => {
     try {
+      // Formato de mensajes para la API incluyendo historial
+      // Excluimos el mensaje de bienvenida si es el primer mensaje en la conversación real
+      const apiMessages = messages.length === 1 && messages[0].id === 'welcome' ? [] : 
+        messages.map(msg => ({
+          role: msg.role === 'assistant' ? 'assistant' : 'user',
+          content: msg.content
+        }));
+      
+      // Añadir el nuevo mensaje del usuario
+      apiMessages.push({
+        role: 'user',
+        content: message
+      });
+      
+      // Asegurar que no excedemos los límites de la API (opcional)
+      // Si la conversación es muy larga, podríamos limitar a los últimos N mensajes
+      const MAX_MESSAGES = 20;
+      const trimmedMessages = apiMessages.length > MAX_MESSAGES ? 
+        apiMessages.slice(-MAX_MESSAGES) : apiMessages;
+      
+      console.log('Enviando historial de mensajes:', trimmedMessages);
+      
       const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -143,12 +166,9 @@ export default function ChatInterface() {
           messages: [
             {
               role: 'system',
-              content: 'Eres un asistente especializado en cálculo integral. Responde en español y utiliza LaTeX para las fórmulas matemáticas. Utiliza $$ para fórmulas en bloque y $ para fórmulas inline.'
+              content: 'Eres un asistente especializado en cálculo integral. Responde en español y utiliza LaTeX para las fórmulas matemáticas. Utiliza $$ para fórmulas en bloque y $ para fórmulas inline. Recuerda el contexto previo de la conversación para dar respuestas coherentes.'
             },
-            {
-              role: 'user',
-              content: message
-            }
+            ...trimmedMessages
           ]
         })
       });
@@ -181,12 +201,30 @@ export default function ChatInterface() {
   };
 
   const generateAIResponse = (userInput: string) => {
+    // Para la simulación sin API, intentamos mantener un contexto simple
+    // Se podría mejorar guardando el estado de la conversación en una variable
     let response = "";
     
-    // Simular respuestas del asistente con formato LaTeX
-    if (userInput.toLowerCase().includes("integral") || userInput.includes("∫")) {
+    // Analizar mensajes previos para obtener contexto
+    const previousMessages = messages.slice(-3); // Últimos 3 mensajes para contexto
+    const hasAskedAbout = (topic: string) => {
+      return previousMessages.some(msg => 
+        msg.role === 'user' && msg.content.toLowerCase().includes(topic.toLowerCase())
+      );
+    };
+    
+    // Verificar si hay preguntas relacionadas en la conversación
+    const isFollowUpQuestion = previousMessages.length > 1 && 
+      !userInput.includes('integral') && 
+      hasAskedAbout('integral');
+    
+    // Simular respuestas del asistente con formato LaTeX y considerando contexto
+    if (userInput.toLowerCase().includes("integral") || userInput.includes("∫") || isFollowUpQuestion) {
       if (userInput.toLowerCase().includes("como") || userInput.toLowerCase().includes("cómo") || userInput.toLowerCase().includes("explicar")) {
         response = `Para calcular una integral, debes aplicar las reglas básicas de integración:\n\n1. **Regla de potencia**: $$\\int x^n dx = \\frac{x^{n+1}}{n+1} + C$$ (para $n \\neq -1$)\n\n2. **Integración de funciones trigonométricas**: $$\\int \\sin(x) dx = -\\cos(x) + C$$\n$$\\int \\cos(x) dx = \\sin(x) + C$$\n\n3. **Integración por partes**: $$\\int u dv = uv - \\int v du$$\n\nVamos paso a paso con un ejemplo.\n\nSupongamos que queremos calcular: $$\\int x^2 dx$$\n\nAplicamos la regla de potencia con $n = 2$:\n$$\\int x^2 dx = \\frac{x^{2+1}}{2+1} + C = \\frac{x^3}{3} + C$$`;
+      } else if (isFollowUpQuestion) {
+        // Respuesta para preguntas de seguimiento sobre integrales
+        response = `Continuando con el tema de integrales, aquí hay algunas técnicas adicionales que podríamos explorar:\n\n1. **Sustitución trigonométrica**: Útil para integrales con raíces cuadradas de expresiones cuadráticas\n\n2. **Fracciones parciales**: Para integrar fracciones racionales\n\n3. **Integración numérica**: Métodos como Simpson o la regla del trapecio\n\n¿Te gustaría profundizar en alguna de estas técnicas específicamente?`;
       } else {
         response = `Vamos a resolver esta integral paso a paso:\n\n$$\\int x^2 dx = \\frac{x^3}{3} + C$$\n\nSi tienes una integral más específica, escríbela usando la notación adecuada y te ayudaré a resolverla en detalle.`;
       }
@@ -196,7 +234,14 @@ export default function ChatInterface() {
     } else if (userInput.toLowerCase().includes("teorema") || userInput.toLowerCase().includes("fundamental")) {
       response = `El Teorema Fundamental del Cálculo establece la conexión entre la derivación y la integración.\n\nSe divide en dos partes:\n\n**Primera parte**: Si $f$ es continua en $[a, b]$ y definimos $F(x) = \\int_a^x f(t) dt$, entonces $F'(x) = f(x)$ para todo $x$ en $[a, b]$.\n\n**Segunda parte**: Si $f$ es continua en $[a, b]$ y $F$ es cualquier antiderivada de $f$, entonces:\n\n$$\\int_a^b f(x) dx = F(b) - F(a)$$\n\nEsto nos permite calcular integrales definidas encontrando solo una antiderivada y evaluándola en los límites de integración.`;
     } else {
-      response = `Gracias por tu mensaje. Como asistente especializado en cálculo integral, puedo ayudarte con:\n\n- Resolver integrales paso a paso\n- Explicar conceptos del cálculo integral\n- Proponer ejercicios de práctica\n\nPuedes escribir ecuaciones usando la sintaxis LaTeX, por ejemplo: $\\int x^2 dx$\n\n¿Hay alguna integral o concepto específico que te gustaría trabajar?`;
+      // Analizar si es una pregunta de seguimiento de otro tema mencionado previamente
+      if (hasAskedAbout('teorema')) {
+        response = `Siguiendo con nuestra discusión sobre teoremas del cálculo, otro importante es el Teorema del Valor Medio para Integrales. Este establece que si $f$ es continua en $[a, b]$, entonces existe al menos un punto $c$ en $(a, b)$ tal que:\n\n$$\\int_a^b f(x) dx = f(c) \\cdot (b - a)$$\n\nEsto significa que el valor de la integral es igual al valor de la función en algún punto $c$ multiplicado por la longitud del intervalo.`;
+      } else if (hasAskedAbout('ejercicio')) {
+        response = `Respecto a los ejercicios que hemos estado discutiendo, ¿necesitas más ejemplos o te gustaría profundizar en alguna técnica específica? Puedo proporcionar ejercicios de diferentes niveles de dificultad adaptados a tu nivel de comprensión actual.`;
+      } else {
+        response = `Gracias por tu mensaje. Como asistente especializado en cálculo integral, puedo ayudarte con:\n\n- Resolver integrales paso a paso\n- Explicar conceptos del cálculo integral\n- Proponer ejercicios de práctica\n\nPuedes escribir ecuaciones usando la sintaxis LaTeX, por ejemplo: $\\int x^2 dx$\n\n¿Hay alguna integral o concepto específico que te gustaría trabajar?`;
+      }
     }
 
     const assistantMessage: Message = {
