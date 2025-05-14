@@ -13,7 +13,7 @@ export default function Header() {
     <header className="border-b bg-background sticky top-0 z-10">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link to="/" className="font-bold text-xl flex items-center gap-2">
-          <span className="text-primary">Calculus</span>
+          <span className="text-primary"> Tutor Calculus</span>
           <span className="text-muted-foreground">AI</span>
         </Link>
 

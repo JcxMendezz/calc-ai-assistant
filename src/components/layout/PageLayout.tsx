@@ -36,7 +36,7 @@ export default function PageLayout({ requireAuth = false }: PageLayoutProps) {
         <Outlet />
       </main>
       <footer className="py-4 text-center text-sm text-muted-foreground border-t">
-        <p>Calculus AI &copy; {new Date().getFullYear()} - Asistente de Cálculo Integral</p>
+        <p>Tutor Calculus AI &copy; {new Date().getFullYear()} - Tutor de Cálculo Integral</p>
       </footer>
     </div>
   );

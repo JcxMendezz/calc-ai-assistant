@@ -26,7 +26,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
     let key = 0;
     
     // Primero extraemos los bloques de LaTeX
-    let contentCopy = content;
+    const contentCopy = content;
     let match;
     
     // Procesar bloques de LaTeX ($$...$$)
@@ -62,7 +62,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       
       // Procesar inline LaTeX ($...$) en el texto restante
       let inlineLastIndex = 0;
-      let inlineParts: (string | JSX.Element)[] = [];
+      const inlineParts: (string | JSX.Element)[] = [];
       let inlineMatch;
       
       while ((inlineMatch = inlineLatexRegex.exec(remainingContent)) !== null) {

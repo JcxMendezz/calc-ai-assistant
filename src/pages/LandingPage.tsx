@@ -11,10 +11,10 @@ export default function LandingPage() {
   return <div className="w-full max-w-4xl mx-auto px-4 py-12 text-center">
       <div className="animate-fade-in space-y-6">
         <h1 className="text-4xl md:text-5xl font-bold mb-6">
-          Calculus <span className="text-primary">AI</span>
+           Tutor Calculus <span className="text-primary">AI</span>
         </h1>
         <p className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto text-muted-foreground">
-          Tu asistente personal para el aprendizaje de cálculo integral, con explicaciones paso a paso y visualización de fórmulas matemáticas
+          Tu asesor personal para el aprendizaje de cálculo integral, con explicaciones paso a paso y visualización de fórmulas matemáticas
         </p>
         
         <div className="bg-muted/40 p-6 rounded-lg border max-w-xl mx-auto my-8">

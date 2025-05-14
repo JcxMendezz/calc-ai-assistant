@@ -57,7 +57,7 @@ export default function ChatInterface() {
       // Mensaje de bienvenida
       const welcomeMessage: Message = {
         id: 'welcome',
-        content: `# Bienvenido al Asistente de Cálculo Integral\n\nPuedo ayudarte con:\n\n- Resolver problemas de cálculo integral\n- Explicar paso a paso la solución\n- Generar ejercicios para que practiques\n\nPuedes escribir ecuaciones usando la sintaxis LaTeX. Por ejemplo:\n\n$$\\int x^2 dx = \\frac{x^3}{3} + C$$\n\n¿En qué puedo ayudarte hoy?`,
+        content: `# Bienvenido a tu Tutor de Cálculo Integral\n\nPuedo ayudarte con:\n\n- Resolver problemas de cálculo integral\n- Explicar paso a paso la solución\n- Generar ejercicios para que practiques\n\nPuedes escribir ecuaciones usando la sintaxis LaTeX. Por ejemplo:\n\n$$\\int x^2 dx = \\frac{x^3}{3} + C$$\n\n¿En qué puedo ayudarte hoy?`,
         role: 'assistant',
         timestamp: Date.now()
       };
@@ -80,10 +80,15 @@ export default function ChatInterface() {
     }
   }, [apiKey]);
 
-  // Scroll al fondo cuando se añaden mensajes
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+// Scroll al fondo cuando se añaden mensajes
+useEffect(() => {
+  // Usar un pequeño timeout para asegurar que el contenido se ha renderizado completamente
+  const scrollTimer = setTimeout(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, 100);
+  
+  return () => clearTimeout(scrollTimer);
+}, [messages]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
@@ -166,7 +171,7 @@ export default function ChatInterface() {
           messages: [
             {
               role: 'system',
-              content: 'Eres un asistente especializado en cálculo integral. Responde en español y utiliza LaTeX para las fórmulas matemáticas. Utiliza $$ para fórmulas en bloque y $ para fórmulas inline. Recuerda el contexto previo de la conversación para dar respuestas coherentes.'
+              content: 'Eres un asistente especializado en cálculo integral. Responde en español y utiliza LaTeX para las fórmulas matemáticas. Utiliza $$ para fórmulas en bloque y $ para fórmulas inline.En cada respuesta sobre integrales: 1) Identifica explícitamente el tipo de integral (indefinida, definida, impropia, por partes, por sustitución, etc.), 2) Explica el enfoque conceptual antes de resolver, 3) Muestra el desarrollo paso a paso, 4) Concluye con una explicación del resultado.Utiliza un tono didáctico y motivador. Recuerda el contexto previo de la conversación para dar respuestas coherentes.'
             },
             ...trimmedMessages
           ]
@@ -290,7 +295,7 @@ export default function ChatInterface() {
     // Mantener solo el mensaje de bienvenida
     const welcomeMessage: Message = {
       id: 'welcome',
-      content: `# Bienvenido al Asistente de Cálculo Integral\n\nPuedo ayudarte con:\n\n- Resolver problemas de cálculo integral\n- Explicar paso a paso la solución\n- Generar ejercicios para que practiques\n\nPuedes escribir ecuaciones usando la sintaxis LaTeX. Por ejemplo:\n\n$$\\int x^2 dx = \\frac{x^3}{3} + C$$\n\n¿En qué puedo ayudarte hoy?`,
+      content: `# Bienvenido a tu Tutor de Cálculo Integral\n\nPuedo ayudarte con:\n\n- Resolver problemas de cálculo integral\n- Explicar paso a paso la solución\n- Generar ejercicios para que practiques\n\nPuedes escribir ecuaciones usando la sintaxis LaTeX. Por ejemplo:\n\n$$\\int x^2 dx = \\frac{x^3}{3} + C$$\n\n¿En qué puedo ayudarte hoy?`,
       role: 'assistant',
       timestamp: Date.now()
     };
