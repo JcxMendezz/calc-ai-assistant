@@ -16,6 +16,7 @@ export interface Message {
   content: string;
   role: 'user' | 'assistant';
   timestamp: number;
+  image?: string; // URL de la imagen del usuario (opcional)
 }
 
 // Ejemplo de ejercicios prácticos
@@ -328,7 +329,7 @@ useEffect(() => {
   return (
     <div className="flex flex-col h-[calc(100vh-6rem)] max-w-4xl w-full mx-auto">
       <div className="flex justify-between mb-4 items-center">
-        <h2 className="text-xl font-bold">Asistente de Cálculo Integral</h2>
+        <h2 className="text-xl font-bold">Tutor de Cálculo Integral</h2>
         <div className="flex gap-2">
           <Button 
             onClick={handleGenerateExercise}

@@ -1,73 +1,99 @@
-# Welcome to your Lovable project
+# 📘 Cálculo Integral - Tutor IA
 
-## Project info
+Un tutor interactivo especializado en cálculo integral que ofrece soluciones paso a paso, explicaciones detalladas y ejercicios prácticos.
 
-**URL**: https://lovable.dev/projects/33f98559-9c82-4e81-a837-ce21770209a9
+---
 
-## How can I edit this code?
+## 📚 Características Principales
 
-There are several ways of editing your application.
+- **Resolución de Integrales:** Soluciones paso a paso con explicaciones detalladas.  
+- **Identificación de Tipos:** Reconoce automáticamente el tipo de integral a resolver.  
+- **Visualización Matemática:** Renderizado LaTeX para fórmulas matemáticas.  
+- **Ejercicios Prácticos:** Generación de ejercicios personalizados.  
+- **Interfaz Conversacional:** Interactúa naturalmente en español.  
+- **Enfoque Tutorial:** Explicaciones pedagógicas adaptadas al nivel del estudiante.  
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/33f98559-9c82-4e81-a837-ce21770209a9) and start prompting.
+## 🛠️ Tecnologías
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Frontend:** React + TypeScript  
+- **Estilizado:** Tailwind CSS + shadcn/ui  
+- **Renderizado Matemático:** KaTeX + react-katex  
+- **Markdown:** ReactMarkdown  
+- **Empaquetado:** Vite  
+- **IA:** Integración con DeepSeek API  
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 📂 Estructura del Proyecto
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+calc-ai-assistant/
+├── src/
+│   ├── components/
+│   │   ├── chat/
+│   │   │   ├── ChatInterface.tsx    # Componente principal de la interfaz
+│   │   │   ├── ChatMessage.tsx      # Renderizado de mensajes con LaTeX
+│   │   │   └── data.ts              # Ejercicios de práctica y ejemplos
+│   │   └── ui/                      # Componentes de UI reutilizables
+│   ├── hooks/
+│   │   └── use-mobile.tsx           # Hook para detectar dispositivos móviles
+│   ├── lib/
+│   │   └── utils.ts                 # Utilidades comunes
+│   └── App.tsx                      # Punto de entrada de la aplicación
+└── public/
+    └── assets/                      # Imágenes y recursos estáticos
 
-Follow these steps:
+---
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 🚀 Cómo Usar
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+- **Preguntar sobre integrales:** Escribe una integral en formato LaTeX (ej: `∫ x^2 dx`).  
+- **Generar ejercicios:** Usa el botón "Generar Ejercicio" para practicar.  
+- **Explicaciones conceptuales:** Pregunta sobre teoremas y conceptos del cálculo integral.  
+- **Verificar soluciones:** Envía tus soluciones para recibir retroalimentación.  
 
-# Step 3: Install the necessary dependencies.
-npm i
+---
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+## ⚙️ Configuración y Ejecución Local
+
+### Clonar el repositorio
+
+git clone <https://github.com/TuUsuario/calc-ai-assistant.git>
+
+### Navegar al directorio
+
+cd calc-ai-assistant
+
+### Instalar dependencias
+
+npm install
+
+### Iniciar servidor de desarrollo
+
 npm run dev
-```
 
-**Edit a file directly in GitHub**
+---
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 📝 Notas para Desarrolladores
 
-**Use GitHub Codespaces**
+- La clase `ChatInterface` maneja la lógica principal de la aplicación.  
+- El renderizado de LaTeX se realiza en `ChatMessage` mediante expresiones regulares.  
+- Las respuestas se generan mediante la API de DeepSeek o a través de respuestas simuladas.  
+- Los ejercicios de práctica están definidos en `data.ts`.  
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+---
 
-## What technologies are used for this project?
+## 📄 Licencia
 
-This project is built with:
+Este proyecto está bajo la **Licencia MIT**. Consulta el archivo `LICENSE` para más detalles.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+---
 
-## How can I deploy this project?
+## 👥 Contribuciones
 
-Simply open [Lovable](https://lovable.dev/projects/33f98559-9c82-4e81-a837-ce21770209a9) and click on Share -> Publish.
+Las contribuciones son bienvenidas. Si deseas mejorar este proyecto, por favor crea un *pull request* o abre un *issue* para discutir tus ideas.
 
-## Can I connect a custom domain to my Lovable project?
+---
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+**Desarrollado con ❤️ para ayudar a estudiantes de cálculo integral.**

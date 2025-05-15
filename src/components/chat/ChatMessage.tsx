@@ -1,4 +1,3 @@
-
 import 'katex/dist/katex.min.css';
 import { BlockMath, InlineMath } from 'react-katex';
 import ReactMarkdown from 'react-markdown';
@@ -11,12 +10,13 @@ interface ChatMessageProps {
   message: Message;
 }
 
-// Expresiones regulares para detectar LaTeX
+// Expresiones regulares mejoradas para detectar LaTeX
 const dollarRegex = /\$\$(.*?)\$\$/gs;
-const inlineLatexRegex = /\$(.*?)\$/g;
+// Regex mejorado para evitar conflictos con símbolos $ en texto normal
+const inlineLatexRegex = /(?<!\$)\$(?!\$)((?:\\.|[^\\$\\])+?)\$/g;
 
 export default function ChatMessage({ message }: ChatMessageProps) {
-  const { content, role } = message;
+  const { content, role, image } = message;
   
   // Procesa el contenido para renderizar LaTeX y Markdown
   const processContent = () => {
@@ -60,57 +60,94 @@ export default function ChatMessage({ message }: ChatMessageProps) {
     if (lastIndex < contentCopy.length) {
       const remainingContent = contentCopy.slice(lastIndex);
       
-      // Procesar inline LaTeX ($...$) en el texto restante
-      let inlineLastIndex = 0;
-      const inlineParts: (string | JSX.Element)[] = [];
-      let inlineMatch;
+      // Usar enfoque de marcadores para procesar LaTeX inline
+      const latexSegments: string[] = [];
+      const processedContent = remainingContent.replace(inlineLatexRegex, (match, formula) => {
+        const marker = `__LATEX_INLINE_${latexSegments.length}__`;
+        latexSegments.push(formula.trim());
+        return marker;
+      });
       
-      while ((inlineMatch = inlineLatexRegex.exec(remainingContent)) !== null) {
-        // Añadir texto antes del inline LaTeX
-        if (inlineMatch.index > inlineLastIndex) {
-          inlineParts.push(remainingContent.slice(inlineLastIndex, inlineMatch.index));
-        }
+      // Si hay marcadores de LaTeX, procesarlos
+      if (latexSegments.length > 0) {
+        // Dividir el contenido en segmentos basados en los marcadores
+        const segments: (string | JSX.Element)[] = [];
+        let lastPos = 0;
+        let markerMatch;
+        const markerRegex = /__LATEX_INLINE_(\d+)__/g;
         
-        // Añadir el inline LaTeX
-        try {
-          const inlineLatexContent = inlineMatch[1].trim();
-          inlineParts.push(<InlineMath key={`inline-${key++}`} math={inlineLatexContent} />);
-        } catch (error) {
-          inlineParts.push(<span key={`inline-${key++}`} className="text-red-500">Error LaTeX</span>);
-        }
-        
-        inlineLastIndex = inlineMatch.index + inlineMatch[0].length;
-      }
-      
-      // Añadir el texto restante después del último inline LaTeX
-      if (inlineLastIndex < remainingContent.length) {
-        inlineParts.push(remainingContent.slice(inlineLastIndex));
-      }
-      
-      // Convertir las partes inline a JSX
-      if (inlineParts.length > 0) {
-        const combinedInlineContent = inlineParts.map((part, idx) => {
-          if (typeof part === 'string') {
-            return (
-              <div key={`md-${idx}`}>
-                <ReactMarkdown>{part}</ReactMarkdown>
-              </div>
+        while ((markerMatch = markerRegex.exec(processedContent)) !== null) {
+          // Añadir texto antes del marcador
+          if (markerMatch.index > lastPos) {
+            segments.push(processedContent.substring(lastPos, markerMatch.index));
+          }
+          
+          // Reemplazar el marcador con el componente LaTeX
+          const index = parseInt(markerMatch[1]);
+          try {
+            segments.push(
+              <InlineMath key={`inline-${key++}`} math={latexSegments[index]} />
+            );
+          } catch (error) {
+            segments.push(
+              <span key={`inline-error-${key++}`} className="text-red-500">Error LaTeX</span>
             );
           }
-          return part;
+          
+          lastPos = markerMatch.index + markerMatch[0].length;
+        }
+        
+        // Añadir el texto restante después del último marcador
+        if (lastPos < processedContent.length) {
+          segments.push(processedContent.substring(lastPos));
+        }
+        
+        // Convertir segmentos a JSX
+        let currentText = "";
+        const finalSegments: JSX.Element[] = [];
+        
+        segments.forEach((segment, idx) => {
+          if (typeof segment === 'string') {
+            currentText += segment;
+          } else {
+            // Renderizar texto acumulado antes del componente LaTeX
+            if (currentText) {
+              finalSegments.push(
+                <span key={`text-${key++}`} className="inline">
+                  <ReactMarkdown>{currentText}</ReactMarkdown>
+                </span>
+              );
+              currentText = "";
+            }
+            finalSegments.push(segment);
+          }
         });
         
-        parts.push(<>{combinedInlineContent}</>);
+        // Renderizar cualquier texto restante
+        if (currentText) {
+          finalSegments.push(
+            <span key={`text-${key++}`} className="inline">
+              <ReactMarkdown>{currentText}</ReactMarkdown>
+            </span>
+          );
+        }
+        
+        parts.push(
+          <div key={`combined-${key++}`} className="inline">
+            {finalSegments}
+          </div>
+        );
       } else {
+        // No hay LaTeX inline, renderizar normalmente
         parts.push(
           <div key={key++}>
-            <ReactMarkdown>{remainingContent}</ReactMarkdown>
+            <ReactMarkdown>{processedContent}</ReactMarkdown>
           </div>
         );
       }
     }
     
-    return <>{parts}</>;
+    return <div className="message-content">{parts}</div>;
   };
 
   return (
@@ -131,6 +168,15 @@ export default function ChatMessage({ message }: ChatMessageProps) {
         </Avatar>
       </div>
       <div className="chat-message flex-1 break-words overflow-x-auto">
+        {image && (
+          <div className="mb-2 rounded-md overflow-hidden border border-border max-h-72 w-fit">
+            <img 
+              src={image} 
+              alt="Imagen cargada" 
+              className="object-contain max-h-72"
+            />
+          </div>
+        )}
         {processContent()}
       </div>
     </div>
