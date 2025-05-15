@@ -24,7 +24,7 @@ Un tutor interactivo especializado en cálculo integral que ofrece soluciones pa
 - **Empaquetado:** Vite  
 - **IA:** Integración con DeepSeek API  
 
----
+```
 
 ## 📂 Estructura del Proyecto
 
@@ -34,8 +34,8 @@ calc-ai-assistant/
 │   │   ├── chat/
 │   │   │   ├── ChatInterface.tsx    # Componente principal de la interfaz
 │   │   │   ├── ChatMessage.tsx      # Renderizado de mensajes con LaTeX
-│   │   │   └── data.ts              # Ejercicios de práctica y ejemplos
-│   │   └── ui/                      # Componentes de UI reutilizables
+│   │   │  
+   │   └── ui/                      # Componentes de UI reutilizables
 │   ├── hooks/
 │   │   └── use-mobile.tsx           # Hook para detectar dispositivos móviles
 │   ├── lib/
@@ -44,7 +44,7 @@ calc-ai-assistant/
 └── public/
     └── assets/                      # Imágenes y recursos estáticos
 
----
+```
 
 ## 🚀 Cómo Usar
 
