@@ -28,7 +28,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
     // Primero extraemos los bloques de LaTeX
     const contentCopy = content;
     let match;
-    
+
     // Procesar bloques de LaTeX ($$...$$)
     while ((match = dollarRegex.exec(contentCopy)) !== null) {
       // Añadir texto antes del bloque LaTeX
@@ -106,7 +106,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
         let currentText = "";
         const finalSegments: JSX.Element[] = [];
         
-        segments.forEach((segment, idx) => {
+        segments.forEach((segment, ) => {
           if (typeof segment === 'string') {
             currentText += segment;
           } else {
